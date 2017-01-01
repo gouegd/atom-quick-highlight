@@ -131,7 +131,7 @@ module.exports =
           @refreshEditor(e)
 
       editorElement = getView(editor)
-      editorSubs.add(editorElement.onDidChangeScrollTop => @refreshEditor(editor))
+      # editorSubs.add(editorElement.onDidChangeScrollTop => @refreshEditor(editor))
 
       # [FIXME]
       # @refreshEditor depends on editorElement.getVisibleRowRange() but it return
@@ -142,7 +142,7 @@ module.exports =
       editorSubs.add editor.onDidChangeSelectionRange ({selection}) =>
         if selection.isLastSelection() and not @isLocked()
           debouncedhighlightSelection(editor)
-      editorSubs.add(editorElement.onDidChangeScrollTop => @highlightSelection(editor))
+      # editorSubs.add(editorElement.onDidChangeScrollTop => @highlightSelection(editor))
 
       editorSubs.add editor.onDidDestroy =>
         @clearEditor(editor)
@@ -187,6 +187,7 @@ module.exports =
     keyword = selection.getText()
     return unless scanRange = getVisibleBufferRange(editor)
     @selectionDecorations = @highlightKeyword(editor, scanRange, keyword, 'box-selection')
+    @emitter.emit('changed-highlights', {editor, decorations: @selectionDecorations})
 
   needToHighlightSelection: (selection) ->
     switch
@@ -262,7 +263,7 @@ module.exports =
     classNames = "quick-highlight #{color}"
     pattern = ///#{_.escapeRegExp(keyword)}///g
     decorations = []
-    editor.scanInBufferRange pattern, scanRange, ({range}) =>
+    editor.scan pattern, ({range}) =>
       decorations.push(@decorateRange(editor, range, {classNames}))
     decorations
 
@@ -286,6 +287,8 @@ module.exports =
     count = 0
     editor.scan(///#{_.escapeRegExp(keyword)}///g, -> count++)
     count
+
+  provideQuickHighlight: -> @emitter
 
   consumeStatusBar: (statusBar) ->
     @statusBarManager.initialize(statusBar)
