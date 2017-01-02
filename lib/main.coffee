@@ -187,7 +187,6 @@ module.exports =
     keyword = selection.getText()
     return unless scanRange = getVisibleBufferRange(editor)
     @selectionDecorations = @highlightKeyword(editor, scanRange, keyword, 'box-selection')
-    @emitter.emit('changed-highlights', {editor, decorations: @selectionDecorations})
 
   needToHighlightSelection: (selection) ->
     switch
@@ -265,6 +264,7 @@ module.exports =
     decorations = []
     editor.scan pattern, ({range}) =>
       decorations.push(@decorateRange(editor, range, {classNames}))
+    @emitter.emit('changed-highlights', {editor, decorations, color})
     decorations
 
   clearEditor: (editor) ->
